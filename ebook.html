@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>อีบุ๊ก 3 มิติ - บทเรียนออนไลน์ ว4.2</title>
+    <!-- Google Font (Prompt) -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Prompt', sans-serif;
+        }
+        :root {
+            --bg-color: #0b0f19;
+            --text-color: #ffffff;
+            --nav-bg: rgba(255, 255, 255, 0.03);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-color: #00f2fe;
+            --sub-text: #94a3b8;
+            --desc-color: #cbd5e1;
+        }
+        body.light-mode {
+            --bg-color: #e2e8f0;
+            --text-color: #0f172a;
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(2, 132, 199, 0.4);
+            --accent-color: #0284c7;
+            --sub-text: #475569;
+            --desc-color: #334155;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 40px 20px 100px; /* เว้นระยะด้านซ้ายให้ Sidebar */
+            position: relative;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Canvas สำหรับสภาพอากาศและดาวตามเมาส์ */
+        #fx-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .sidebar, nav, .container, footer {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ---------------- แถบเครื่องมือด้านข้าง (Sidebar ฝั่งซ้าย) ---------------- */
+        .sidebar {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--nav-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.1);
+        }
+
+        .sidebar-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--sub-text);
+            text-decoration: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: rgba(0, 242, 254, 0.2);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .sidebar-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 60px;
+            background: var(--bg-color);
+            color: var(--accent-color);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar-item:hover::after {
+            opacity: 1;
+        }
+
+        /* Navbar ด้านบน */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--nav-bg);
+            border: 1px solid var(--border-color);
+            padding: 14px 30px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 25px;
+        }
+        .logo {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--accent-color);
+        }
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            font-size: 0.9rem;
+            color: var(--sub-text);
+        }
+        .nav-links a {
+            color: var(--sub-text);
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-color);
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+        .user-info {
+            font-size: 0.85rem;
+            background: rgba(0, 242, 254, 0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            color: var(--accent-color);
+        }
+
+        /* ส่วนเนื้อหาหลัก E-Book Viewer */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-bottom: 20px;
+        }
+        .section-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+            text-align: center;
+        }
+        
+        /* กรอบสำหรับฝัง FlipHTML5 E-Book */
+        .ebook-frame-container {
+            width: 100%;
+            height: 480px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 15px 35px rgba(0, 242, 254, 0.1);
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .ebook-frame-container iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* แผงปุ่มเสริมด้านล่างอีบุ๊ก */
+        .ebook-actions {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .action-btn {
+            background: rgba(0, 242, 254, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--accent-color);
+            padding: 10px 24px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .action-btn:hover {
+            background: var(--accent-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 15px var(--accent-color);
+        }
+
+        /* การ์ดเกร็ดความรู้เพิ่มเติม */
+        .tips-card {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }
+        .tips-card h4 {
+            color: var(--accent-color);
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        .tips-card p {
+            color: var(--desc-color);
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+
+        /* ฟุตเตอร์ */
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--sub-text);
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="fx-canvas"></canvas>
+
+    <!-- แถบเครื่องมือด้านข้าง (Sidebar) -->
+    <div class="sidebar">
+        <a href="index.html" class="sidebar-item" data-tooltip="หน้าแรก">🏠</a>
+        <a href="ebook.html" class="sidebar-item active" data-tooltip="E-Book 3 มิติ">📖</a>
+        <a href="media.html" class="sidebar-item" data-tooltip="ศูนย์รวมสื่อการสอน">🎥</a>
+        <a href="quiz.html" class="sidebar-item" data-tooltip="แบบทดสอบและเกม">🎮</a>
+        <div class="sidebar-item" id="speech-btn" data-tooltip="ฟังเสียงอ่านหน้าเว็บ" onclick="speakPageContent()">🗣️</div>
+        <div class="sidebar-item" id="theme-btn" data-tooltip="สลับโหมดสว่าง/มืด" onclick="toggleTheme()">🌙</div>
+    </div>
+
+    <!-- เมนูด้านบน -->
+    <nav>
+        <div class="logo">NovaLearn <span style="font-size: 0.7rem; color: var(--accent-color);">ว4.2</span></div>
+        <div class="nav-links">
+            <a href="index.html">หน้าแรก</a>
+            <a href="ebook.html" class="active" style="color: var(--accent-color);">E-Book</a>
+            <a href="media.html">ศูนย์รวมสื่อการสอน</a>
+            <a href="quiz.html">แบบทดสอบ</a>
+        </div>
+        <div class="user-info">
+            wattanan 6714261020 คณะครุศาสตร์คอมพิวเตอร์
+        </div>
+    </nav>
+
+    <!-- เนื้อหาอีบุ๊ก 3 มิติ -->
+    <div class="container" id="main-content">
+        <div class="section-title">📖 หนังสืออิเล็กทรอนิกส์ (E-Book) 3 มิติ บทเรียนวิชาเทคโนโลยี ว4.2</div>
+        
+        <div class="ebook-frame-container">
+            <!-- ฝังเล่มอีบุ๊กจาก FlipHTML5 ของคุณลงบนเว็บ -->
+            <iframe src="https://online.fliphtml5.com/pgkpb/udbj/" seamless="seamless" scrolling="no" frameborder="0" allowtransparency="true" allowfullscreen="true"></iframe>
+        </div>
+
+        <!-- ปุ่มเสริมเพิ่มความโปร -->
+        <div class="ebook-actions">
+            <a href="https://online.fliphtml5.com/pgkpb/udbj/" target="_blank" class="action-btn">
+                🖥️ เปิดอ่านแบบเต็มจอ (Fullscreen)
+            </a>
+            <a href="https://online.fliphtml5.com/pgkpb/udbj/" target="_blank" class="action-btn">
+                📥 ดาวน์โหลด / อ่านผ่านเบราว์เซอร์แยก
+            </a>
+        </div>
+
+        <!-- การ์ดเกร็ดความรู้ -->
+        <div class="tips-card">
+            <h4>💡 คำแนะนำในการใช้งาน E-Book</h4>
+            <p>ผู้เรียนสามารถคลิกที่มุมกระดาษหรือใช้เมาส์ลากเพื่อพลิกหน้าหนังสือได้เหมือนหนังสือจริง สามารถซูมเข้า-ออกเพื่อดูตัวอักษรและภาพประกอบได้อย่างชัดเจน ขอให้สนุกกับการเรียนรู้ครับ!</p>
+        </div>
+    </div>
+
+    <footer>
+        Web-Based Learning System | Computer Education
+    </footer>
+
+    <!-- สคริปต์ระบบเสียงอ่าน, สลับธีม และสภาพอากาศ (ฝน/หิมะ + ดาวตามเมาส์) -->
+    <script>
+        function speakPageContent() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const text = document.getElementById('main-content').innerText;
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'th-TH';
+                utterance.rate = 0.85;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("เบราว์เซอร์ของคุณไม่รองรับระบบเสียงพูด");
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const themeBtn = document.getElementById('theme-btn');
+            if (document.body.classList.contains('light-mode')) {
+                themeBtn.innerText = '☀️';
+                themeBtn.setAttribute('data-tooltip', 'โหมดมืด');
+            } else {
+                themeBtn.innerText = '🌙';
+                themeBtn.setAttribute('data-tooltip', 'สลับโหมดสว่าง/มืด');
+            }
+        }
+
+        const canvas = document.getElementById('fx-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const particles = [];
+        for (let i = 0; i < 20; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                length: Math.random() * 15 + 10,
+                radius: Math.random() * 2 + 1.5,
+                speedY: Math.random() * 1 + 0.6,
+                alpha: Math.random() * 0.6 + 0.3
+            });
+        }
+
+        const cursorStars = [];
+        window.addEventListener('mousemove', (e) => {
+            for (let i = 0; i < 2; i++) {
+                cursorStars.push({
+                    x: e.clientX + (Math.random() - 0.5) * 12,
+                    y: e.clientY + (Math.random() - 0.5) * 12,
+                    size: Math.random() * 2.5 + 1,
+                    speedX: (Math.random() - 0.5) * 2,
+                    speedY: (Math.random() - 0.5) * 2,
+                    alpha: 1
+                });
+            }
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const isLight = document.body.classList.contains('light-mode');
+
+            particles.forEach(p => {
+                ctx.globalAlpha = p.alpha;
+
+                if (isLight) {
+                    ctx.strokeStyle = 'rgba(2, 132, 199, 0.65)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p.x - 2, p.y + p.length);
+                    ctx.stroke();
+
+                    p.y += p.speedY * 10;
+                    p.x -= 0.8;
+                } else {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    p.y += p.speedY * 1.2;
+                    p.x += Math.sin(p.y / 30) * 0.4;
+                }
+
+                if (p.y > canvas.height) {
+                    p.y = -20;
+                    p.x = Math.random() * canvas.width;
+                }
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+            });
+
+            cursorStars.forEach((star, index) => {
+                ctx.globalAlpha = star.alpha;
+                ctx.fillStyle = isLight ? '#0284c7' : '#00f2fe';
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                star.x += star.speedX;
+                star.y += star.speedY;
+                star.alpha -= 0.04;
+
+                if (star.alpha <= 0) {
+                    cursorStars.splice(index, 1);
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

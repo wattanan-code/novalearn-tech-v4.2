@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบทดสอบและเกม - บทเรียนออนไลน์ ว4.2</title>
+    <!-- Google Font (Prompt) -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Prompt', sans-serif;
+        }
+        :root {
+            --bg-color: #0b0f19;
+            --text-color: #ffffff;
+            --nav-bg: rgba(255, 255, 255, 0.03);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(0, 242, 254, 0.3);
+            --accent-color: #00f2fe;
+            --sub-text: #94a3b8;
+        }
+        body.light-mode {
+            --bg-color: #e2e8f0;
+            --text-color: #0f172a;
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(2, 132, 199, 0.4);
+            --accent-color: #0284c7;
+            --sub-text: #334155;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 40px 20px 100px;
+            position: relative;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #fx-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .sidebar, nav, .container, footer {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* แถบเครื่องมือด้านข้าง (Sidebar ฝั่งซ้าย) */
+        .sidebar {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--nav-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.1);
+        }
+
+        .sidebar-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--sub-text);
+            text-decoration: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: rgba(0, 242, 254, 0.2);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .sidebar-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 60px;
+            background: var(--bg-color);
+            color: var(--accent-color);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar-item:hover::after {
+            opacity: 1;
+        }
+
+        /* Navbar ด้านบน */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--nav-bg);
+            border: 1px solid var(--border-color);
+            padding: 14px 30px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 25px;
+        }
+
+        .logo { font-weight: 600; font-size: 1.1rem; color: var(--accent-color); }
+        .nav-links { display: flex; gap: 40px; font-size: 0.9rem; color: var(--sub-text); }
+        .nav-links a { color: var(--sub-text); text-decoration: none; transition: 0.3s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--text-color); text-shadow: 0 0 10px var(--accent-color); }
+        .user-info { font-size: 0.85rem; background: rgba(0, 242, 254, 0.1); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border-color); color: var(--accent-color); }
+
+        .container { max-width: 1000px; margin: 0 auto; width: 100%; flex: 1; display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; }
+        .section-title { font-size: 1.5rem; font-weight: 600; margin-bottom: 25px; color: var(--accent-color); text-align: center; }
+
+        .game-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; width: 100%; margin-bottom: 40px; }
+        .game-card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; text-align: center; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0, 242, 254, 0.1); transition: all 0.3s ease; display: flex; flex-direction: column; justify-content: space-between; }
+        .game-card:hover { transform: translateY(-8px); border-color: var(--accent-color); }
+        .game-icon { font-size: 3rem; margin-bottom: 15px; }
+        .game-card h3 { font-size: 1.2rem; color: var(--text-color); margin-bottom: 12px; }
+        .game-card p { font-size: 0.9rem; color: var(--sub-text); line-height: 1.6; margin-bottom: 25px; }
+        .play-btn { display: inline-block; background: var(--accent-color); color: var(--bg-color); padding: 12px 25px; border-radius: 10px; font-weight: 600; font-size: 0.95rem; text-decoration: none; transition: 0.3s; }
+        .play-btn:hover { opacity: 0.9; transform: scale(1.05); }
+
+        .minigame-section { width: 100%; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 30px; text-align: center; backdrop-filter: blur(5px); margin-bottom: 20px; }
+        .minigame-title { font-size: 1.2rem; color: var(--accent-color); margin-bottom: 15px; font-weight: 600; }
+        .quiz-box { background: var(--nav-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 25px; max-width: 750px; margin: 0 auto; position: relative; }
+        .timer-bar-container { width: 100%; height: 8px; background: rgba(255, 255, 255, 0.1); border-radius: 4px; overflow: hidden; margin-bottom: 20px; }
+        .timer-bar-fill { width: 100%; height: 100%; background: var(--accent-color); transition: width 1s linear; }
+        .quiz-info { display: flex; justify-content: space-between; font-size: 0.9rem; color: var(--sub-text); margin-bottom: 15px; }
+        .quiz-question { font-size: 1.15rem; color: var(--text-color); margin-bottom: 20px; font-weight: 600; line-height: 1.5; }
+        .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 15px; }
+        .quiz-btn { background: var(--card-bg); border: 1px solid var(--border-color); color: var(--text-color); padding: 14px; border-radius: 8px; font-size: 0.95rem; cursor: pointer; transition: 0.2s; font-family: 'Prompt', sans-serif; text-align: left; }
+        .quiz-btn:hover { background: rgba(2, 132, 199, 0.15); border-color: var(--accent-color); }
+        .quiz-status { font-size: 0.9rem; color: var(--sub-text); margin-top: 15px; }
+        footer { text-align: center; font-size: 0.8rem; color: var(--sub-text); padding-top: 10px; }
+    </style>
+</head>
+<body>
+
+    <canvas id="fx-canvas"></canvas>
+
+    <!-- แถบเครื่องมือด้านข้าง (Sidebar) -->
+    <div class="sidebar">
+        <a href="index.html" class="sidebar-item" data-tooltip="หน้าแรก">🏠</a>
+        <a href="ebook.html" class="sidebar-item" data-tooltip="E-Book 3 มิติ">📖</a>
+        <a href="media.html" class="sidebar-item" data-tooltip="ศูนย์รวมสื่อการสอน">🎥</a>
+        <a href="quiz.html" class="sidebar-item active" data-tooltip="แบบทดสอบและเกม">🎮</a>
+        <div class="sidebar-item" id="speech-btn" data-tooltip="ฟังเสียงอ่านโจทย์" onclick="speakCurrentQuestion()">🗣️</div>
+        <div class="sidebar-item" id="theme-btn" data-tooltip="สลับโหมดสว่าง/มืด" onclick="toggleTheme()">🌙</div>
+    </div>
+
+    <script>
+        function speakCurrentQuestion() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const questionText = document.getElementById('quiz-question').innerText;
+                const optionsElements = document.querySelectorAll('.quiz-btn');
+                let fullText = "คำถามคือ: " + questionText + " ตัวเลือกได้แก่: ";
+                optionsElements.forEach((opt, idx) => {
+                    fullText += `ตัวเลือกที่ ${idx + 1}: ${opt.innerText} `;
+                });
+
+                const utterance = new SpeechSynthesisUtterance(fullText);
+                utterance.lang = 'th-TH';
+                utterance.rate = 0.85;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("เบราว์เซอร์ของคุณไม่รองรับระบบเสียงพูด");
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const themeBtn = document.getElementById('theme-btn');
+            if (document.body.classList.contains('light-mode')) {
+                themeBtn.innerText = '☀️';
+                themeBtn.setAttribute('data-tooltip', 'โหมดมืด');
+            } else {
+                themeBtn.innerText = '🌙';
+                themeBtn.setAttribute('data-tooltip', 'สลับโหมดสว่าง/มืด');
+            }
+        }
+    </script>
+
+    <!-- เมนูด้านบน -->
+    <nav>
+        <div class="logo">NovaLearn <span style="font-size: 0.7rem;">ว4.2</span></div>
+        <div class="nav-links">
+            <a href="index.html">หน้าแรก</a>
+            <a href="ebook.html">E-Book</a>
+            <a href="media.html">ศูนย์รวมสื่อการสอน</a>
+            <a href="quiz.html" class="active" style="color: var(--accent-color);">แบบทดสอบ</a>
+        </div>
+        <div class="user-info">
+            wattanan 6714261020 คณะครุศาสตร์คอมพิวเตอร์
+        </div>
+    </nav>
+
+    <!-- เนื้อหาหลัก -->
+    <div class="container">
+        <div class="section-title">🎮 กิจกรรมทดสอบความรู้และมินิเกมท้ายบทเรียน</div>
+        
+        <div class="game-grid">
+            <div class="game-card">
+                <div>
+                    <div class="game-icon">🚀</div>
+                    <h3>เกมทดสอบความรู้ Zep Quiz</h3>
+                    <p>สนุกไปกับการตอบคำถามทบทวนความรู้เกี่ยวกับเว็บเบอร์ซาวด์และเทคโนโลยีผ่านแพลตฟอร์ม Zep สุดตื่นเต้น</p>
+                </div>
+                <a href="https://quiz.zep.us/th/play/mkGRnm" target="_blank" class="play-btn">🎮 เริ่มเล่น Zep Quiz</a>
+            </div>
+
+            <div class="game-card">
+                <div>
+                    <div class="game-icon">📝</div>
+                    <h3>แบบทดสอบโปรแกรมเว็บเบราว์เซอร์ (Wordwall)</h3>
+                    <p>ทดสอบความเข้าใจผ่านกิจกรรมจับคู่และตอบคำถามทบทวนเนื้อหาบทเรียนรูปแบบอินเทอร์แอคทีฟ</p>
+                </div>
+                <a href="https://wordwall.net/resource/72995453" target="_blank" class="play-btn">📝 ทำแบบทดสอบ Wordwall</a>
+            </div>
+        </div>
+
+        <div class="minigame-section">
+            <div class="minigame-title" id="stage-title">🏆 มินิเกมตะลุยด่านความรู้ (ด่านที่ 1: ง่าย)</div>
+            <div class="quiz-box" id="quiz-container">
+                <div class="timer-bar-container">
+                    <div class="timer-bar-fill" id="timer-fill"></div>
+                </div>
+
+                <div class="quiz-info">
+                    <span id="question-number">คำถามข้อที่ 1</span>
+                    <span id="timer-display" style="color: var(--accent-color); font-weight: 600;">⏱️ เวลา: 30 วินาที</span>
+                </div>
+                <div class="quiz-question" id="quiz-question">กำลังโหลดคำถาม...</div>
+                <div class="quiz-options" id="quiz-options"></div>
+                <div class="quiz-status" id="quiz-feedback">คะแนนสะสม: <span id="score-text">0</span> คะแนน (กดปุ่ม 🗣️ ด้านซ้ายเพื่อฟังเสียงอ่านโจทย์ได้)</div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Web-Based Learning System | Computer Education
+    </footer>
+
+    <!-- สคริปต์สภาพอากาศ (ลดจำนวนหิมะลง) และดาวตามเมาส์ -->
+    <script>
+        const canvas = document.getElementById('fx-canvas');
+        const ctx = canvas.getContext('2d');
+        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // ฝน / หิมะพื้นหลัง (ลดจำนวนลงเหลือ 35 เม็ด เพื่อไม่ให้รกตา)
+        const particles = [];
+        for (let i = 0; i < 35; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                length: Math.random() * 15 + 10,
+                radius: Math.random() * 2 + 1.5,
+                speedY: Math.random() * 2 + 1,
+                alpha: Math.random() * 0.6 + 0.3
+            });
+        }
+
+        // เอฟเฟกต์ดาววิ่งตามเมาส์
+        const cursorStars = [];
+        window.addEventListener('mousemove', (e) => {
+            for (let i = 0; i < 2; i++) {
+                cursorStars.push({
+                    x: e.clientX + (Math.random() - 0.5) * 12,
+                    y: e.clientY + (Math.random() - 0.5) * 12,
+                    size: Math.random() * 2.5 + 1,
+                    speedX: (Math.random() - 0.5) * 2,
+                    speedY: (Math.random() - 0.5) * 2,
+                    alpha: 1
+                });
+            }
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const isLight = document.body.classList.contains('light-mode');
+
+            // วาดฝน หรือ หิมะ
+            particles.forEach(p => {
+                ctx.globalAlpha = p.alpha;
+
+                if (isLight) {
+                    // โหมดสว่าง: ฝนตก
+                    ctx.strokeStyle = 'rgba(2, 132, 199, 0.65)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p.x - 2, p.y + p.length);
+                    ctx.stroke();
+
+                    p.y += p.speedY * 10;
+                    p.x -= 0.8;
+                } else {
+                    // โหมดมืด: หิมะตก (แบบบางตา)
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    p.y += p.speedY * 1.2;
+                    p.x += Math.sin(p.y / 30) * 0.5;
+                }
+
+                if (p.y > canvas.height) {
+                    p.y = -20;
+                    p.x = Math.random() * canvas.width;
+                }
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+            });
+
+            // วาดดาวตามเมาส์
+            cursorStars.forEach((star, index) => {
+                ctx.globalAlpha = star.alpha;
+                ctx.fillStyle = isLight ? '#0284c7' : '#00f2fe';
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+                star.x += star.speedX;
+                star.y += star.speedY;
+                star.alpha -= 0.04;
+                if (star.alpha <= 0) { cursorStars.splice(index, 1); }
+            });
+
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        // โลจิกมินิเกม
+        const stages = [
+            { level: "ด่านที่ 1: ง่าย (พื้นฐานเว็บเบราว์เซอร์)", question: "ข้อใดคือชื่อของโปรแกรม 'เว็บเบราว์เซอร์' ที่มี 4 สี?", options: ["ก. Google Chrome", "ข. Microsoft Word", "ค. Paint", "ง. Calculator"], answer: 0 },
+            { level: "ด่านที่ 2: ปานกลาง (หน้าที่และการใช้งาน)", question: "ช่องยาวๆ ด้านบนของหน้าเว็บเบราว์เซอร์ที่มีไว้สำหรับพิมพ์ที่อยู่เว็บไซต์ เรียกว่าอะไร?", options: ["ก. แถบเสียง", "ข. ช่องค้นหาและ URL", "ค. ปุ่มปิดหน้าจอ", "ง. ถังขยะ"], answer: 1 },
+            { level: "ด่านที่ 3: ยาก (การดูแลรักษา)", question: "ข้อใดคือการปฏิบัติตนที่ถูกต้องที่สุดเมื่อใช้งานคอมพิวเตอร์?", options: ["ก. นำน้ำหวานมาดื่มข้างแป้นพิมพ์", "ข. ใช้ดินสอขีดเขียนหน้าจอ", "ค. ควบคุมแรงกดและรักษาความสะอาด", "ง. ดึงปลั๊กไฟออกทันที"], answer: 2 }
+        ];
+
+        let currentStage = 0, score = 0, timeLeft = 30, timerInterval;
+        const totalTime = 30;
+        const stageTitle = document.getElementById('stage-title'), questionNumElem = document.getElementById('question-number'), timerDisplay = document.getElementById('timer-display'), timerFill = document.getElementById('timer-fill'), questionElem = document.getElementById('quiz-question'), optionsElem = document.getElementById('quiz-options'), feedbackElem = document.getElementById('quiz-feedback'), scoreText = document.getElementById('score-text');
+
+        function loadStage() {
+            clearInterval(timerInterval);
+            timeLeft = 30;
+            timerFill.style.width = '100%';
+            const stage = stages[currentStage];
+            stageTitle.innerText = `🏆 มินิเกมตะลุยด่านความรู้ (${stage.level})`;
+            questionNumElem.innerText = `ด่านที่ ${currentStage + 1} จาก 3`;
+            questionElem.innerText = stage.question;
+            optionsElem.innerHTML = '';
+            stage.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.classList.add('quiz-btn');
+                btn.innerText = opt;
+                btn.onclick = () => selectAnswer(index);
+                optionsElem.appendChild(btn);
+            });
+            scoreText.innerText = score;
+            startTimer();
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerHTML = `⏱️ เวลา: ${timeLeft} วินาที`;
+                timerFill.style.width = (timeLeft / totalTime) * 100 + '%';
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    nextStage();
+                }
+            }, 1000);
+        }
+
+        function selectAnswer(index) {
+            window.speechSynthesis.cancel();
+            clearInterval(timerInterval);
+            if (index === stages[currentStage].answer) score++;
+            nextStage();
+        }
+
+        function nextStage() {
+            currentStage++;
+            if (currentStage < stages.length) {
+                loadStage();
+            } else {
+                stageTitle.innerText = `🎉 สรุปผลคะแนน`;
+                questionElem.innerText = `คุณทำคะแนนได้ ${score} / 3 คะแนน!`;
+                optionsElem.innerHTML = `<button class="quiz-btn" style="grid-column: span 2; text-align: center;" onclick="currentStage=0;score=0;loadStage();">🔄 เล่นใหม่อีกครั้ง</button>`;
+                timerFill.style.width = '0%';
+            }
+        }
+        loadStage();
+    </script>
+</body>
+</html>

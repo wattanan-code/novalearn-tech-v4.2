@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บทเรียนออนไลน์ วิชาเทคโนโลยี ว4.2</title>
+    <!-- Google Font (Prompt) -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Prompt', sans-serif;
+        }
+        :root {
+            --bg-color: #0b0f19;
+            --text-color: #ffffff;
+            --nav-bg: rgba(255, 255, 255, 0.03);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-color: #00f2fe;
+            --sub-text: #94a3b8;
+            --desc-color: #cbd5e1;
+        }
+        body.light-mode {
+            --bg-color: #e2e8f0;
+            --text-color: #0f172a;
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(2, 132, 199, 0.4);
+            --accent-color: #0284c7;
+            --sub-text: #475569;
+            --desc-color: #334155;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            padding: 20px 40px 20px 100px;
+            position: relative;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #fx-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .sidebar, nav, .hero, footer {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* แถบเครื่องมือด้านข้าง (Sidebar ฝั่งซ้าย) */
+        .sidebar {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--nav-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.1);
+        }
+
+        .sidebar-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--sub-text);
+            text-decoration: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: rgba(0, 242, 254, 0.2);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .sidebar-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 60px;
+            background: var(--bg-color);
+            color: var(--accent-color);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar-item:hover::after {
+            opacity: 1;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-nav { animation: fadeInDown 0.8s ease-out forwards; }
+        .animate-hero-1 { animation: fadeInUp 0.8s ease-out 0.2s forwards; opacity: 0; }
+        .animate-hero-2 { animation: fadeInUp 0.8s ease-out 0.4s forwards; opacity: 0; }
+        .animate-hero-3 { animation: fadeInUp 0.8s ease-out 0.6s forwards; opacity: 0; }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--nav-bg);
+            border: 1px solid var(--border-color);
+            padding: 14px 30px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+        .logo {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--accent-color);
+        }
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            font-size: 0.9rem;
+            color: var(--sub-text);
+        }
+        .nav-links a {
+            color: var(--sub-text);
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-color);
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+        .user-info {
+            font-size: 0.85rem;
+            background: rgba(0, 242, 254, 0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            color: var(--accent-color);
+        }
+
+        .hero {
+            text-align: center;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .badge {
+            display: inline-block;
+            background: linear-gradient(135deg, #0072ff, #00f2fe);
+            color: #fff;
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            font-weight: 600;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+        }
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 15px;
+            background: linear-gradient(180deg, var(--text-color) 0%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subject {
+            font-size: 0.95rem;
+            color: var(--sub-text);
+            margin-bottom: 20px;
+        }
+        .desc {
+            font-size: 0.9rem;
+            color: var(--desc-color);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        .btn {
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+        }
+        .btn-primary {
+            background: var(--accent-color);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.4);
+        }
+        .btn-primary:hover {
+            opacity: 0.9;
+            box-shadow: 0 0 25px var(--accent-color);
+        }
+        .btn-outline {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        .btn-outline:hover {
+            background: rgba(0, 242, 254, 0.1);
+            border-color: var(--accent-color);
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--sub-text);
+            padding-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="fx-canvas"></canvas>
+
+    <div class="sidebar">
+        <a href="index.html" class="sidebar-item active" data-tooltip="หน้าแรก">🏠</a>
+        <a href="ebook.html" class="sidebar-item" data-tooltip="E-Book 3 มิติ">📖</a>
+        <a href="media.html" class="sidebar-item" data-tooltip="ศูนย์รวมสื่อการสอน">🎥</a>
+        <a href="quiz.html" class="sidebar-item" data-tooltip="แบบทดสอบและเกม">🎮</a>
+        <div class="sidebar-item" id="speech-btn" data-tooltip="ฟังเสียงอ่านหน้าเว็บ" onclick="speakPageContent()">🗣️</div>
+        <div class="sidebar-item" id="theme-btn" data-tooltip="สลับโหมดสว่าง/มืด" onclick="toggleTheme()">🌙</div>
+    </div>
+
+    <nav class="animate-nav">
+        <div class="logo">NovaLearn <span style="font-size: 0.7rem; color: var(--accent-color);"> ว4.2</span></div>
+        <div class="nav-links">
+            <a href="index.html" class="active" style="color: var(--accent-color);">หน้าแรก</a>
+            <a href="ebook.html">E-Book</a>
+            <a href="media.html">ศูนย์รวมสื่อการสอน</a>
+            <a href="quiz.html">แบบทดสอบ</a>
+        </div>
+        <div class="user-info">
+            wattanan 6714261020 คณะครุศาสตร์คอมพิวเตอร์
+        </div>
+    </nav>
+
+    <div class="hero" id="main-content">
+        <div class="animate-hero-1">
+            <div class="badge">⚡ บทเรียนออนไลน์ วิชาเทคโนโลยี</div>
+            <h1>แหล่งเรียนรู้ดิจิทัล พัฒนาทักษะการคิดเชิงคำนวณ เทคโนโลยี และการรู้ดิจิทัล สำหรับผู้เรียนยุคใหม่</h1>
+        </div>
+        
+        <div class="animate-hero-2">
+            <div class="subject">กลุ่มสาระการเรียนรู้: วิทยาศาสตร์และเทคโนโลยี (ตัวชี้วัด ว 4.2)</div>
+            <div class="desc">
+                เข้าใจและใช้แนวคิดเชิงคำนวณในการแก้ปัญหาที่พบในชีวิตจริงอย่างเป็นขั้นตอนและเป็นระบบ<br>
+                ใช้เทคโนโลยีสารสนเทศและการสื่อสารในการเรียนรู้ การทำงาน และการแก้ปัญหาได้อย่างมีประสิทธิภาพ รู้เท่าทัน และมีจริยธรรม
+            </div>
+        </div>
+
+        <div class="btn-group animate-hero-3">
+            <a href="media.html" class="btn btn-primary">เข้าสู่ห้องเรียน</a>
+            <a href="ebook.html" class="btn btn-outline">E-Book</a>
+        </div>
+    </div>
+
+    <footer class="animate-hero-3">
+        Web-Based Learning System | Computer Education
+    </footer>
+
+    <script>
+        function speakPageContent() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const text = document.getElementById('main-content').innerText;
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'th-TH';
+                utterance.rate = 0.85;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("เบราว์เซอร์ของคุณไม่รองรับระบบเสียงพูด");
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const themeBtn = document.getElementById('theme-btn');
+            if (document.body.classList.contains('light-mode')) {
+                themeBtn.innerText = '☀️';
+                themeBtn.setAttribute('data-tooltip', 'โหมดมืด');
+            } else {
+                themeBtn.innerText = '🌙';
+                themeBtn.setAttribute('data-tooltip', 'สลับโหมดสว่าง/มืด');
+            }
+        }
+
+        const canvas = document.getElementById('fx-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const particles = [];
+        for (let i = 0; i < 20; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                length: Math.random() * 15 + 10,
+                radius: Math.random() * 2 + 1.5,
+                speedY: Math.random() * 1 + 0.6, // ปรับความเร็วเพิ่มขึ้นให้กำลังพอดี ไม่ช้าเกินไป
+                alpha: Math.random() * 0.6 + 0.3
+            });
+        }
+
+        const cursorStars = [];
+        window.addEventListener('mousemove', (e) => {
+            for (let i = 0; i < 2; i++) {
+                cursorStars.push({
+                    x: e.clientX + (Math.random() - 0.5) * 12,
+                    y: e.clientY + (Math.random() - 0.5) * 12,
+                    size: Math.random() * 2.5 + 1,
+                    speedX: (Math.random() - 0.5) * 2,
+                    speedY: (Math.random() - 0.5) * 2,
+                    alpha: 1
+                });
+            }
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const isLight = document.body.classList.contains('light-mode');
+
+            particles.forEach(p => {
+                ctx.globalAlpha = p.alpha;
+
+                if (isLight) {
+                    ctx.strokeStyle = 'rgba(2, 132, 199, 0.65)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p.x - 2, p.y + p.length);
+                    ctx.stroke();
+
+                    p.y += p.speedY * 10;
+                    p.x -= 0.8;
+                } else {
+                    // หิมะโหมดมืด (ปรับความเร็วให้กำลังดี ไม่ช้าเกินไป)
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    p.y += p.speedY * 1.2; 
+                    p.x += Math.sin(p.y / 30) * 0.4;
+                }
+
+                if (p.y > canvas.height) {
+                    p.y = -20;
+                    p.x = Math.random() * canvas.width;
+                }
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+            });
+
+            cursorStars.forEach((star, index) => {
+                ctx.globalAlpha = star.alpha;
+                ctx.fillStyle = isLight ? '#0284c7' : '#00f2fe';
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                star.x += star.speedX;
+                star.y += star.speedY;
+                star.alpha -= 0.04;
+
+                if (star.alpha <= 0) {
+                    cursorStars.splice(index, 1);
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

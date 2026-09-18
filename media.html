@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ศูนย์รวมสื่อการสอน - บทเรียนออนไลน์ ว4.2</title>
+    <!-- Google Font (Prompt) -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Prompt', sans-serif;
+        }
+        :root {
+            --bg-color: #0b0f19;
+            --text-color: #ffffff;
+            --nav-bg: rgba(255, 255, 255, 0.03);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-color: #00f2fe;
+            --sub-text: #94a3b8;
+            --desc-color: #cbd5e1;
+        }
+        body.light-mode {
+            --bg-color: #e2e8f0;
+            --text-color: #0f172a;
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(2, 132, 199, 0.4);
+            --accent-color: #0284c7;
+            --sub-text: #475569;
+            --desc-color: #334155;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 40px 20px 100px;
+            position: relative;
+            overflow-x: hidden;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Canvas สำหรับสภาพอากาศและดาวตามเมาส์ */
+        #fx-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .sidebar, nav, .container, footer, .minigame-section {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* ---------------- แถบเครื่องมือด้านข้าง (Sidebar ฝั่งซ้าย) ---------------- */
+        .sidebar {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--nav-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.1);
+        }
+
+        .sidebar-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--sub-text);
+            text-decoration: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: rgba(0, 242, 254, 0.2);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .sidebar-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 60px;
+            background: var(--bg-color);
+            color: var(--accent-color);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar-item:hover::after {
+            opacity: 1;
+        }
+
+        /* Navbar ด้านบน */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--nav-bg);
+            border: 1px solid var(--border-color);
+            padding: 14px 30px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--accent-color);
+        }
+        .nav-links {
+            display: flex;
+            gap: 40px;
+            font-size: 0.9rem;
+            color: var(--sub-text);
+        }
+        .nav-links a {
+            color: var(--sub-text);
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-color);
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+        .user-info {
+            font-size: 0.85rem;
+            background: rgba(0, 242, 254, 0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            color: var(--accent-color);
+        }
+
+        /* ส่วนเนื้อหาหลัก (Media Hub) */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            padding-bottom: 20px;
+        }
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--accent-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 12px;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            transition: 0.3s;
+            backdrop-filter: blur(5px);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-color);
+            box-shadow: 0 10px 30px rgba(0, 242, 254, 0.1);
+        }
+        .card h3 {
+            font-size: 1.05rem;
+            margin-bottom: 10px;
+            color: var(--text-color);
+        }
+        .card p {
+            font-size: 0.85rem;
+            color: var(--sub-text);
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%;
+            height: 0;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .obs-center-wrapper {
+            max-width: 850px;
+            margin: 0 auto 40px auto;
+        }
+        .obs-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 25px;
+            backdrop-filter: blur(5px);
+            box-shadow: 0 10px 30px rgba(0, 242, 254, 0.1);
+        }
+        .obs-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: var(--text-color);
+            text-align: center;
+        }
+        .obs-card p {
+            font-size: 0.9rem;
+            color: var(--sub-text);
+            line-height: 1.6;
+            text-align: center;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* โซนมินิเกมตอบคำถามจับเวลา */
+        .minigame-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            margin-bottom: 30px;
+            backdrop-filter: blur(5px);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .minigame-title {
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        .quiz-box {
+            background: var(--nav-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 20px;
+        }
+        .quiz-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--sub-text);
+            margin-bottom: 15px;
+        }
+        .quiz-question {
+            font-size: 1.05rem;
+            color: var(--text-color);
+            margin-bottom: 20px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+        .quiz-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'Prompt', sans-serif;
+            text-align: left;
+        }
+        .quiz-btn:hover {
+            background: rgba(0, 242, 254, 0.15);
+            border-color: var(--accent-color);
+        }
+        .quiz-status {
+            font-size: 0.85rem;
+            color: var(--desc-color);
+            margin-top: 10px;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--sub-text);
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="fx-canvas"></canvas>
+
+    <!-- แถบเครื่องมือด้านข้าง (Sidebar) -->
+    <div class="sidebar">
+        <a href="index.html" class="sidebar-item" data-tooltip="หน้าแรก">🏠</a>
+        <a href="ebook.html" class="sidebar-item" data-tooltip="E-Book 3 มิติ">📖</a>
+        <a href="media.html" class="sidebar-item active" data-tooltip="ศูนย์รวมสื่อการสอน">🎥</a>
+        <a href="quiz.html" class="sidebar-item" data-tooltip="แบบทดสอบและเกม">🎮</a>
+        <!-- ปุ่มเสียงอ่านเฉพาะโจทย์ควิซปัจจุบัน -->
+        <div class="sidebar-item" id="speech-btn" data-tooltip="ฟังเสียงอ่านโจทย์ควิซ" onclick="speakCurrentQuiz()">🗣️</div>
+        <div class="sidebar-item" id="theme-btn" data-tooltip="สลับโหมดสว่าง/มืด" onclick="toggleTheme()">🌙</div>
+    </div>
+
+    <!-- เมนูด้านบน -->
+    <nav>
+        <div class="logo">NovaLearn <span style="font-size: 0.7rem; color: var(--accent-color);">ว4.2</span></div>
+        <div class="nav-links">
+            <a href="index.html">หน้าแรก</a>
+            <a href="ebook.html">E-Book</a>
+            <a href="media.html" class="active" style="color: var(--accent-color);">ศูนย์รวมสื่อการสอน</a>
+            <a href="quiz.html">แบบทดสอบ</a>
+        </div>
+        <div class="user-info">
+            wattanan 6714261020 คณะครุศาสตร์คอมพิวเตอร์
+        </div>
+    </nav>
+
+    <!-- เนื้อหาศูนย์รวมสื่อการสอน -->
+    <div class="container">
+        
+        <!-- ส่วนที่ 1: พอดคาสต์ (Podcast) แบบฝังวิดีโอเล่นบนเว็บ -->
+        <div class="section-title">🎙️ พอดคาสต์ (Podcast) สรุปบทเรียน</div>
+        <div class="grid-3">
+            <div class="card">
+                <h3>ตอนที่ 1: ตะลุยโลกกว้างด้วย "เว็บเบราว์เซอร์"</h3>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/ikGJ3SeEEns" title="Podcast Episode 1" allowfullscreen></iframe>
+                </div>
+                <p>พอดคาสต์สำหรับเด็กๆ ชั้น ป.3 ทำความรู้จักกับ "เว็บเบราว์เซอร์" เสมือนวุ้นแปลภาษาที่ช่วยแปลงโค้ดคอมพิวเตอร์ซับซ้อนให้กลายเป็นหน้าเว็บสวยๆ และเป็นประตูบานแรกในการท่องอินเทอร์เน็ตอย่างปลอดภัย</p>
+            </div>
+            <div class="card">
+                <h3>ตอนที่ 2: เรื่องเล่าจากแก๊งไอที...น้องช่วยดูแลผมหน่อยครับ</h3>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/rk6tizQMn78" title="Podcast Episode 2" allowfullscreen></iframe>
+                </div>
+                <p>พอดคาสต์เสียง AI พาเรียนรู้ 3 คาถาปกป้องอุปกรณ์ไอที: ห้ามขีดเขียนหน้าจอ, ออกแรงกดพิมพ์หรือคลิกให้พอดี และห้ามนำขนมหรือน้ำหวานมาทานใกล้เครื่อง เพื่อยืดอายุการใช้งานให้นานแสนนาน</p>
+            </div>
+        </div>
+
+        <!-- มินิเกมตอบคำถามจับเวลาจากพอดคาสต์ทั้ง 2 เรื่อง -->
+        <div class="minigame-section">
+            <div class="minigame-title">⏱️ มินิเกมควิซ: ตอบคำถามจากพอดคาสต์ (30 วินาที)</div>
+            <div class="quiz-box" id="quiz-container">
+                <div class="quiz-info">
+                    <span id="question-number">คำถามข้อที่ 1 / 3</span>
+                    <span id="timer-display" style="color: var(--accent-color); font-weight: 600;">⏳ เวลา: 30 วินาที</span>
+                </div>
+                <div class="quiz-question" id="quiz-question">กำลังโหลดคำถาม...</div>
+                <div class="quiz-options" id="quiz-options"></div>
+                <div class="quiz-status" id="quiz-feedback">คะแนนปัจจุบัน: <span id="score-text">0</span> คะแนน (กดปุ่ม 🗣️ ด้านซ้ายเพื่อฟังเสียงอ่านโจทย์)</div>
+            </div>
+        </div>
+
+        <!-- ส่วนที่ 2: วิดีโอสอนจาก OBS -->
+        <div class="section-title">💻 วิดีโอสอนเนื้อหา (บันทึกจาก OBS)</div>
+        <div class="obs-center-wrapper">
+            <div class="obs-card">
+                <h3>แนะนำเว็บเบราว์เซอร์ วิธีใช้งานแบบคร่าวๆ</h3>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/ySMPutrjazk" title="OBS Lesson" allowfullscreen></iframe>
+                </div>
+                <p>วิดีโอแนะนำหน้าตาและการใช้งาน Google Chrome เบื้องต้น การค้นหาข้อมูล การใช้งาน Google Apps เช่น Docs, Sheet, Slide, Gemini และวิธีการสร้าง Shortcut บนเว็บอย่างง่าย</p>
+            </div>
+        </div>
+
+        <!-- ส่วนที่ 3: การใช้เครื่องมือ AI ในการสร้างสื่อ -->
+        <div class="section-title">🤖 การใช้เครื่องมือ AI สร้างสื่อการสอน</div>
+        <div class="grid-3">
+            <div class="card">
+                <h3>AI Image Generation (ภาพประกอบ)</h3>
+                <p>ประยุกต์ใช้เครื่องมือปัญญาประดิษฐ์ (เช่น Bing Image Creator) ในการสร้างสรรค์ภาพประกอบหน้าปกและสื่อกราฟิกสำหรับบทเรียน เพื่อดึงดูดความสนใจของผู้เรียนให้ตื่นตัวอยู่เสมอ</p>
+                <span style="font-size: 0.75rem; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 4px 8px; border-radius: 4px;">เครื่องมือ: Bing Image Creator / Canva AI</span>
+            </div>
+            <div class="card">
+                <h3>AI Voice & Script (เสียงบรรยาย)</h3>
+                <p>ใช้เทคโนโลยี AI Text-to-Speech (Botnoi Voice) ในการสังเคราะห์เสียงพากย์ภาษาไทยสำหรับวิดีโอพอดคาสต์ ช่วยเพิ่มความน่าฟัง ชัดเจน และได้มาตรฐานสม่ำเสมอ</p>
+                <span style="font-size: 0.75rem; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 4px 8px; border-radius: 4px;">เครื่องมือ: Botnoi Voice (บอทน้อย วอยซ์)</span>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        Web-Based Learning System | Computer Education
+    </footer>
+
+    <!-- สคริปต์ระบบเสียงอ่านเฉพาะโจทย์, สลับธีม, สภาพอากาศ และมินิเกมตอบคำถาม -->
+    <script>
+        function speakCurrentQuiz() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const questionText = document.getElementById('quiz-question').innerText;
+                const optionsElements = document.querySelectorAll('.quiz-btn');
+                
+                if (!questionText || questionText.includes("สรุปผล")) return;
+
+                let fullText = "คำถามคือ: " + questionText + " ตัวเลือกได้แก่: ";
+                optionsElements.forEach((opt, idx) => {
+                    fullText += `ตัวเลือกที่ ${idx + 1}: ${opt.innerText} `;
+                });
+
+                const utterance = new SpeechSynthesisUtterance(fullText);
+                utterance.lang = 'th-TH';
+                utterance.rate = 0.85;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("เบราว์เซอร์ของคุณไม่รองรับระบบเสียงพูด");
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const themeBtn = document.getElementById('theme-btn');
+            if (document.body.classList.contains('light-mode')) {
+                themeBtn.innerText = '☀️';
+                themeBtn.setAttribute('data-tooltip', 'โหมดมืด');
+            } else {
+                themeBtn.innerText = '🌙';
+                themeBtn.setAttribute('data-tooltip', 'สลับโหมดสว่าง/มืด');
+            }
+        }
+
+        const canvas = document.getElementById('fx-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const particles = [];
+        for (let i = 0; i < 20; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                length: Math.random() * 15 + 10,
+                radius: Math.random() * 2 + 1.5,
+                speedY: Math.random() * 1 + 0.6,
+                alpha: Math.random() * 0.6 + 0.3
+            });
+        }
+
+        const cursorStars = [];
+        window.addEventListener('mousemove', (e) => {
+            for (let i = 0; i < 2; i++) {
+                cursorStars.push({
+                    x: e.clientX + (Math.random() - 0.5) * 12,
+                    y: e.clientY + (Math.random() - 0.5) * 12,
+                    size: Math.random() * 2.5 + 1,
+                    speedX: (Math.random() - 0.5) * 2,
+                    speedY: (Math.random() - 0.5) * 2,
+                    alpha: 1
+                });
+            }
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const isLight = document.body.classList.contains('light-mode');
+
+            particles.forEach(p => {
+                ctx.globalAlpha = p.alpha;
+
+                if (isLight) {
+                    ctx.strokeStyle = 'rgba(2, 132, 199, 0.65)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p.x - 2, p.y + p.length);
+                    ctx.stroke();
+
+                    p.y += p.speedY * 10;
+                    p.x -= 0.8;
+                } else {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    p.y += p.speedY * 1.2;
+                    p.x += Math.sin(p.y / 30) * 0.4;
+                }
+
+                if (p.y > canvas.height) {
+                    p.y = -20;
+                    p.x = Math.random() * canvas.width;
+                }
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+            });
+
+            cursorStars.forEach((star, index) => {
+                ctx.globalAlpha = star.alpha;
+                ctx.fillStyle = isLight ? '#0284c7' : '#00f2fe';
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                star.x += star.speedX;
+                star.y += star.speedY;
+                star.alpha -= 0.04;
+
+                if (star.alpha <= 0) {
+                    cursorStars.splice(index, 1);
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        // ---------------- โลจิกมินิเกม (ปรับเวลาเป็น 30 วินาที) ----------------
+        const quizData = [
+            {
+                question: "ข้อใดคือหน้าที่ของ 'เว็บเบราว์เซอร์'?",
+                options: [
+                    "ก. สร้างภาพกราฟิก",
+                    "ข. แปลงโค้ดเป็นหน้าเว็บ",
+                    "ค. พิมพ์เอกสาร",
+                    "ง. กำจัดไวรัส"
+                ],
+                answer: 1
+            },
+            {
+                question: "สิ่งใดไม่ควรทำกับหน้าจอคอมพิวเตอร์?",
+                options: [
+                    "ก. ใช้ดินสอขีดเขียน",
+                    "ข. เช็ดทำความสะอาด",
+                    "ค. วาดรูปในแอป",
+                    "ง. ปิดเครื่องถูกวิธี"
+                ],
+                answer: 0
+            },
+            {
+                question: "สิ่งใดห้ามนำมาทานใกล้เครื่องไอที?",
+                options: [
+                    "ก. สมุดบันทึก",
+                    "ข. ดินสอสี",
+                    "ค. ขนมและน้ำหวาน",
+                    "ง. ไม้บรรทัด"
+                ],
+                answer: 2
+            }
+        ];
+
+        let currentQuiz = 0;
+        let score = 0;
+        let timeLeft = 30; // ปรับเวลาเป็น 30 วินาที
+        const totalTime = 30;
+        let timerInterval;
+
+        const questionNumElem = document.getElementById('question-number');
+        const timerDisplay = document.getElementById('timer-display');
+        const questionElem = document.getElementById('quiz-question');
+        const optionsElem = document.getElementById('quiz-options');
+        const feedbackElem = document.getElementById('quiz-feedback');
+        const scoreText = document.getElementById('score-text');
+
+        function loadQuiz() {
+            clearInterval(timerInterval);
+            timeLeft = 30; // รีเซ็ตเวลาเป็น 30 วินาที
+            timerDisplay.innerHTML = `⏳ เวลา: ${timeLeft} วินาที`;
+
+            if (currentQuiz < quizData.length) {
+                const currentData = quizData[currentQuiz];
+                questionNumElem.innerText = `คำถามข้อที่ ${currentQuiz + 1} / ${quizData.length}`;
+                questionElem.innerText = currentData.question;
+                optionsElem.innerHTML = '';
+
+                currentData.options.forEach((opt, index) => {
+                    const btn = document.createElement('button');
+                    btn.classList.add('quiz-btn');
+                    btn.innerText = opt;
+                    btn.onclick = () => selectAnswer(index);
+                    optionsElem.appendChild(btn);
+                });
+
+                scoreText.innerText = score;
+                startTimer();
+            } else {
+                showScore();
+            }
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerHTML = `⏳ เวลา: ${timeLeft} วินาที`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    feedbackElem.innerHTML = `⏰ <span style="color: #f87171;">หมดเวลา! (ได้ 0 คะแนนข้อนี้)</span>`;
+                    disableButtons();
+                    setTimeout(() => {
+                        currentQuiz++;
+                        loadQuiz();
+                    }, 1500);
+                }
+            }, 1000);
+        }
+
+        function selectAnswer(selectedIndex) {
+            clearInterval(timerInterval);
+            const currentData = quizData[currentQuiz];
+            disableButtons();
+
+            if (selectedIndex === currentData.answer) {
+                score += 1;
+                scoreText.innerText = score;
+                feedbackElem.innerHTML = `✅ <span style="color: #4ade80;">ถูกต้อง! (+1 คะแนน)</span>`;
+            } else {
+                feedbackElem.innerHTML = `❌ <span style="color: #f87171;">ยังไม่ถูกต้องครับ</span>`;
+            }
+
+            setTimeout(() => {
+                currentQuiz++;
+                loadQuiz();
+            }, 1500);
+        }
+
+        function disableButtons() {
+            const buttons = optionsElem.getElementsByTagName('button');
+            for (let b of buttons) {
+                b.disabled = true;
+                b.style.cursor = 'default';
+                b.style.opacity = '0.6';
+            }
+        }
+
+        function showScore() {
+            questionNumElem.innerText = `🎉 สรุปผลคะแนน`;
+            questionElem.innerText = `คุณทำคะแนนทดสอบได้ ${score} / 3 คะแนนเต็ม!`;
+            optionsElem.innerHTML = `<button class="quiz-btn" style="grid-column: span 2; background: var(--accent-color); color: var(--bg-color); font-weight: 600; text-align: center;" onclick="restartQuiz()">🔄 เล่นใหม่อีกครั้ง</button>`;
+            timerDisplay.innerHTML = `✨ ยอดเยี่ยม`;
+            feedbackElem.innerHTML = `เก่งมากครับ! เล่นเกมจบครบทุกข้อแล้ว`;
+        }
+
+        function restartQuiz() {
+            currentQuiz = 0;
+            score = 0;
+            loadQuiz();
+        }
+
+        loadQuiz();
+    </script>
+</body>
+</html>
