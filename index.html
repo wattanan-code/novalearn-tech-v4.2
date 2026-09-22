@@ -156,7 +156,7 @@
         }
         .nav-links {
             display: flex;
-            gap: 40px;
+            gap: 30px;
             font-size: 0.9rem;
             color: var(--sub-text);
         }
@@ -263,8 +263,10 @@
 
     <canvas id="fx-canvas"></canvas>
 
+    <!-- Sidebar เพิ่มปุ่ม 📚 เชื่อมโยงไปหน้า content.html -->
     <div class="sidebar">
         <a href="index.html" class="sidebar-item active" data-tooltip="หน้าแรก">🏠</a>
+        <a href="content.html" class="sidebar-item" data-tooltip="รายละเอียดบทเรียน">📚</a>
         <a href="ebook.html" class="sidebar-item" data-tooltip="E-Book 3 มิติ">📖</a>
         <a href="media.html" class="sidebar-item" data-tooltip="ศูนย์รวมสื่อการสอน">🎥</a>
         <a href="quiz.html" class="sidebar-item" data-tooltip="แบบทดสอบและเกม">🎮</a>
@@ -272,10 +274,12 @@
         <div class="sidebar-item" id="theme-btn" data-tooltip="สลับโหมดสว่าง/มืด" onclick="toggleTheme()">🌙</div>
     </div>
 
+    <!-- Navbar เพิ่มเมนูรายละเอียดบทเรียน -->
     <nav class="animate-nav">
         <div class="logo">NovaLearn <span style="font-size: 0.7rem; color: var(--accent-color);"> ว4.2</span></div>
         <div class="nav-links">
             <a href="index.html" class="active" style="color: var(--accent-color);">หน้าแรก</a>
+            <a href="content.html">รายละเอียดบทเรียน</a>
             <a href="ebook.html">E-Book</a>
             <a href="media.html">ศูนย์รวมสื่อการสอน</a>
             <a href="quiz.html">แบบทดสอบ</a>
@@ -352,7 +356,7 @@
                 y: Math.random() * canvas.height,
                 length: Math.random() * 15 + 10,
                 radius: Math.random() * 2 + 1.5,
-                speedY: Math.random() * 1 + 0.6, // ปรับความเร็วเพิ่มขึ้นให้กำลังพอดี ไม่ช้าเกินไป
+                speedY: Math.random() * 1 + 0.6,
                 alpha: Math.random() * 0.6 + 0.3
             });
         }
@@ -389,7 +393,6 @@
                     p.y += p.speedY * 10;
                     p.x -= 0.8;
                 } else {
-                    // หิมะโหมดมืด (ปรับความเร็วให้กำลังดี ไม่ช้าเกินไป)
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
                     ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);

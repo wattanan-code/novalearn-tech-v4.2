@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>รายละเอียดบทเรียนและเนื้อหา - วิชาเทคโนโลยี ว4.2</title>
+    <!-- Google Font (Prompt) -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Prompt', sans-serif;
+        }
+        :root {
+            --bg-color: #0b0f19;
+            --text-color: #ffffff;
+            --nav-bg: rgba(255, 255, 255, 0.03);
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --accent-color: #00f2fe;
+            --sub-text: #94a3b8;
+            --desc-color: #cbd5e1;
+            --highlight-tag: #38bdf8; 
+        }
+        body.light-mode {
+            --bg-color: #e2e8f0;
+            --text-color: #0f172a;
+            --nav-bg: rgba(255, 255, 255, 0.8);
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(2, 132, 199, 0.4);
+            --accent-color: #0284c7;
+            --sub-text: #475569;
+            --desc-color: #334155;
+            --highlight-tag: #0284c7;
+        }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px 40px 20px 100px;
+            position: relative;
+            overflow-x: hidden;
+            overflow-y: auto;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        #fx-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .sidebar, nav, .container, footer {
+            position: relative;
+            z-index: 2;
+        }
+
+        /* Sidebar ฝั่งซ้าย */
+        .sidebar {
+            position: fixed;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--nav-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 15px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.1);
+        }
+
+        .sidebar-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--sub-text);
+            text-decoration: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-item:hover, .sidebar-item.active {
+            background: rgba(0, 242, 254, 0.2);
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+            box-shadow: 0 0 15px var(--accent-color);
+            transform: scale(1.1);
+        }
+
+        .sidebar-item::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 60px;
+            background: var(--bg-color);
+            color: var(--accent-color);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .sidebar-item:hover::after {
+            opacity: 1;
+        }
+
+        /* Navbar ด้านบน */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--nav-bg);
+            border: 1px solid var(--border-color);
+            padding: 14px 30px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 30px;
+        }
+        .logo {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--accent-color);
+        }
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            font-size: 0.9rem;
+            color: var(--sub-text);
+        }
+        .nav-links a {
+            color: var(--sub-text);
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--text-color);
+            text-shadow: 0 0 10px var(--accent-color);
+        }
+        .user-info {
+            font-size: 0.85rem;
+            background: rgba(0, 242, 254, 0.1);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            color: var(--accent-color);
+        }
+
+        /* กล่องเนื้อหาหลัก */
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            padding-bottom: 40px;
+        }
+
+        .section-header {
+            margin-bottom: 25px;
+        }
+        .section-tag {
+            display: inline-block;
+            font-size: 0.8rem;
+            color: var(--highlight-tag);
+            background: rgba(0, 242, 254, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 242, 254, 0.2);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            margin-bottom: 10px;
+        }
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+        .section-desc {
+            font-size: 0.9rem;
+            color: var(--sub-text);
+            line-height: 1.6;
+        }
+
+        /* ตารางรายละเอียดบทเรียน */
+        .table-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin-bottom: 40px;
+        }
+        .info-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .info-table thead tr {
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .info-table th {
+            padding: 16px 24px;
+            text-align: left;
+            font-size: 0.9rem;
+            color: var(--highlight-tag);
+            font-weight: 600;
+        }
+        .info-table th:first-child {
+            width: 25%;
+        }
+        .info-table td {
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            color: var(--desc-color);
+            line-height: 1.6;
+            vertical-align: top;
+        }
+        .info-table tr:last-child td {
+            border-bottom: none;
+        }
+        .info-table td.label-cell {
+            color: var(--text-color);
+            font-weight: 600;
+        }
+        .sub-tag {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--sub-text);
+            font-weight: 400;
+            margin-top: 4px;
+        }
+
+        /* KPA Cards Grid */
+        .kpa-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        .kpa-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .kpa-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-color);
+            opacity: 0.5;
+            transition: opacity 0.3s;
+        }
+        .kpa-card:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-6px);
+            box-shadow: 0 15px 35px rgba(0, 242, 254, 0.2);
+        }
+        .kpa-card:hover::before {
+            opacity: 1;
+        }
+        .kpa-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+        .kpa-k { background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.3); }
+        .kpa-p { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .kpa-a { background: rgba(236, 72, 153, 0.15); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.3); }
+
+        .kpa-card h4 {
+            font-size: 1.1rem;
+            color: var(--text-color);
+            margin-bottom: 10px;
+        }
+        .kpa-card ul {
+            padding-left: 18px;
+            font-size: 0.88rem;
+            color: var(--desc-color);
+            line-height: 1.6;
+        }
+        .kpa-card li {
+            margin-bottom: 8px;
+        }
+
+        /* การ์ดเนื้อหาหลัก */
+        .content-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 25px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        .content-card:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 10px 30px rgba(0, 242, 254, 0.12);
+        }
+        .content-card h3 {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .content-card p {
+            font-size: 0.92rem;
+            color: var(--desc-color);
+            line-height: 1.7;
+            margin-bottom: 14px;
+        }
+        .highlight-box {
+            background: rgba(0, 242, 254, 0.05);
+            border-left: 3px solid var(--accent-color);
+            padding: 16px 20px;
+            border-radius: 0 10px 10px 0;
+            font-size: 0.9rem;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        /* สไตล์กรอบสำหรับรูปภาพ */
+        .img-container {
+            text-align: center;
+            margin: 18px 0;
+            padding: 12px;
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 12px;
+            border: 1px dashed var(--border-color);
+        }
+        .img-container img {
+            width: 100%;
+            max-width: 350px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* กิมมิก: Secret Hint Box */
+        .secret-box {
+            background: rgba(0, 242, 254, 0.03);
+            border: 1px dashed var(--accent-color);
+            border-radius: 14px;
+            padding: 20px;
+            margin-top: 18px;
+            text-align: center;
+        }
+        .secret-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--accent-color);
+            margin-bottom: 10px;
+        }
+        .secret-btn {
+            background: var(--accent-color);
+            color: var(--bg-color);
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
+        }
+        .secret-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--accent-color);
+        }
+        .secret-content {
+            display: none;
+            margin-top: 15px;
+            padding: 14px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            font-size: 0.88rem;
+            color: var(--text-color);
+            text-align: left;
+            line-height: 1.6;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--sub-text);
+            padding-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="fx-canvas"></canvas>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <a href="index.html" class="sidebar-item" data-tooltip="หน้าแรก">🏠</a>
+        <a href="content.html" class="sidebar-item active" data-tooltip="รายละเอียดบทเรียน">📚</a>
+        <a href="ebook.html" class="sidebar-item" data-tooltip="E-Book 3 มิติ">📖</a>
+        <a href="media.html" class="sidebar-item" data-tooltip="ศูนย์รวมสื่อการสอน">🎥</a>
+        <a href="quiz.html" class="sidebar-item" data-tooltip="แบบทดสอบและเกม">🎮</a>
+        <div class="sidebar-item" id="speech-btn" data-tooltip="ฟังเสียงอ่านหน้าเว็บ" onclick="speakPageContent()">🗣️</div>
+        <div class="sidebar-item" id="theme-btn" data-tooltip="สลับโหมดสว่าง/มืด" onclick="toggleTheme()">🌙</div>
+    </div>
+
+    <!-- Navbar -->
+    <nav>
+        <div class="logo">NovaLearn <span style="font-size: 0.7rem; color: var(--accent-color);">ว4.2</span></div>
+        <div class="nav-links">
+            <a href="index.html">หน้าแรก</a>
+            <a href="content.html" class="active" style="color: var(--accent-color);">รายละเอียดบทเรียน</a>
+            <a href="ebook.html">E-Book</a>
+            <a href="media.html">ศูนย์รวมสื่อการสอน</a>
+            <a href="quiz.html">แบบทดสอบ</a>
+        </div>
+        <div class="user-info">
+            wattanan 6714261020 คณะครุศาสตร์คอมพิวเตอร์
+        </div>
+    </nav>
+
+    <div class="container" id="main-content">
+        
+        <!-- ส่วนที่ 1: รายละเอียดบทเรียนและตัวชี้วัด -->
+        <div class="section-header">
+            <span class="section-tag">ส่วนที่ 01 • CURRICULUM OVERVIEW</span>
+            <h1 class="section-title">รายละเอียดบทเรียน</h1>
+            <p class="section-desc">ภาพรวมของหน่วยการเรียนรู้ ตัวชี้วัดมาตรฐานกลุ่มสาระวิทยาศาสตร์และเทคโนโลยี และจุดประสงค์การเรียนรู้</p>
+        </div>
+
+        <div class="table-card">
+            <table class="info-table">
+                <thead>
+                    <tr>
+                        <th>หัวข้อ</th>
+                        <th>รายละเอียด</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="label-cell">รหัสวิชา / กลุ่มสาระ</td>
+                        <td>ว13101 - กลุ่มสาระการเรียนรู้วิทยาศาสตร์และเทคโนโลยี</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">ระดับชั้น</td>
+                        <td>ประถมศึกษาปีที่ 3 (ป.3)</td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">
+                            ตัวชี้วัด ว 4.2
+                            <span class="sub-tag">วิทยาการคำนวณ</span>
+                        </td>
+                        <td>
+                            • <strong>ว 4.2 ป.3/3</strong> ใช้อินเทอร์เน็ตค้นหาความรู้<br>
+                            • <strong>ว 4.2 ป.3/4</strong> ใช้เทคโนโลยีสารสนเทศอย่างปลอดภัย ปฏิบัติตามข้อตกลงในการใช้อินเทอร์เน็ต
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="label-cell">สมรรถนะสำคัญ</td>
+                        <td>ความสามารถในการสื่อสาร · ความสามารถในการคิดวิเคราะห์ · การแก้ปัญหาอย่างเป็นระบบ · การใช้เทคโนโลยีสารสนเทศและการสื่อสาร</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ส่วนจุดประสงค์การเรียนรู้ (KPA) -->
+        <div class="section-header" style="margin-top: 15px;">
+            <span class="section-tag">ส่วนที่ 02 • LEARNING OBJECTIVES</span>
+            <h2 class="section-title">จุดประสงค์การเรียนรู้ (KPA)</h2>
+            <p class="section-desc">เกณฑ์การวัดและประเมินผลการเรียนรู้ของผู้เรียนตามตัวชี้วัด ว 4.2 ป.3/3 และ ป.3/4</p>
+        </div>
+
+        <div class="kpa-grid">
+            <!--ด้านความรู้ (Knowledge)-->
+            <div class="kpa-card">
+                <span class="kpa-badge kpa-k">K - Knowledge</span>
+                <h4>ด้านความรู้</h4>
+                <ul>
+                    <li>อธิบายความหมายและหน้าที่ของเว็บเบราว์เซอร์ในการท่องอินเทอร์เน็ตได้</li>
+                    <li>บอกวิธีปฏิบัติในการใช้อินเทอร์เน็ตและเทคโนโลยีสารสนเทศอย่างปลอดภัยได้</li>
+                    <li>ตระหนักถึงความสำคัญในการดูแลรักษาอุปกรณ์คอมพิวเตอร์</li>
+                </ul>
+            </div>
+
+            <!--ด้านทักษะ (Process)-->
+            <div class="kpa-card">
+                <span class="kpa-badge kpa-p">P - Process</span>
+                <h4>ด้านทักษะ / กระบวนการ</h4>
+                <ul>
+                    <li>ใช้งานเว็บเบราว์เซอร์เบื้องต้นเพื่อค้นหาข้อมูลความรู้ที่ต้องการได้</li>
+                    <li>ปฏิบัติการใช้งานคอมพิวเตอร์ตามข้อตกลงและดูแลรักษาอุปกรณ์ได้อย่างถูกต้อง</li>
+                    <li>วิเคราะห์ความปลอดภัยในการใช้อินเทอร์เน็ตเบื้องต้นได้</li>
+                </ul>
+            </div>
+
+            <!--ด้านคุณลักษณะ (Attribute)-->
+            <div class="kpa-card">
+                <span class="kpa-badge kpa-a">A - Attribute</span>
+                <h4>ด้านคุณลักษณะอันพึงประสงค์</h4>
+                <ul>
+                    <li>มีความมุ่งมั่นและสนใจใฝ่เรียนรู้ในการศึกษาเทคโนโลยีดิจิทัล</li>
+                    <li>มีวินัยและมีความรับผิดชอบในการใช้อุปกรณ์คอมพิวเตอร์ส่วนรวมและส่วนตัว</li>
+                    <li>มีจริยธรรมและรู้เท่าทันภัยไซเบอร์ในการใช้อินเทอร์เน็ต</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ส่วนที่ 3: เนื้อหาบทเรียนหลัก -->
+        <div class="section-header" style="margin-top: 25px;">
+            <span class="section-tag">ส่วนที่ 03 • CORE CONTENT</span>
+            <h2 class="section-title">เนื้อหาบทเรียน</h2>
+        </div>
+
+        <div class="content-card">
+            <h3>🌐 1. รู้จัก "เว็บเบราว์เซอร์" (Web Browser)</h3>
+            <p>
+                <strong>เว็บเบราว์เซอร์</strong> คือโปรแกรมที่ทำหน้าที่เป็น <em>"ยานพาหนะพาเราท่องโลกอินเทอร์เน็ต"</em> โดยจะคอยแปลงรหัสคอมพิวเตอร์ที่ซับซ้อนให้กลายเป็นภาพ ตัวหนังสือ และวิดีโอสวยๆ บนหน้าจอ
+            </p>
+            
+            <!-- รูปภาพที่ 1 -->
+            <div class="img-container">
+                <img src="https://hocco.co/wp-content/uploads/2023/05/06-browser.jpeg" alt="เว็บเบราว์เซอร์">
+            </div>
+
+            <div class="highlight-box">
+                • <strong>Google Chrome:</strong> เบราว์เซอร์ยอดนิยม มีไอคอนวงกลม 4 สี ใช้งานง่าย ค้นหาข้อมูลง่าย<br>
+                • <strong>Microsoft Edge:</strong> เบราว์เซอร์ไอคอนคลื่นสีฟ้าของ Windows<br>
+                • <strong>Safari:</strong> เบราว์เซอร์รูปเข็มทิศสำหรับอุปกรณ์ Apple
+            </div>
+
+            <!-- กิมมิก: กล่องความลับเรื่องเว็บเบราว์เซอร์ -->
+            <div class="secret-box">
+                <div class="secret-title">💡 ความลับน่ารู้: ทำไมถึงเรียกว่า "เบราว์เซอร์"?</div>
+                <button class="secret-btn" onclick="toggleSecret('secret-1', this)">🔍 คลิกเพื่อเปิดดูเฉลย</button>
+                <div id="secret-1" class="secret-content">
+                    คำว่า <strong>"Browse"</strong> ในภาษาอังกฤษแปลว่า <em>"การพลิกดูผ่านๆ หรือการเลือกชม"</em> เมื่อเติมคำว่า er เข้าไป จึงหมายถึง <strong>"เครื่องมือที่ช่วยให้เราพลิกดูหน้าเว็บไซต์ต่างๆ ได้อย่างอิสระเหมือนเปิดดูหนังสือเล่มใหญ่นั่นเองครับ!"</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="content-card">
+            <h3>🛡️ 2. การใช้เทคโนโลยีสารสนเทศและการดูแลรักษาอุปกรณ์</h3>
+            <p>
+                การใช้อินเทอร์เน็ตอย่างปลอดภัยและการดูแลรักษาอุปกรณ์คอมพิวเตอร์ให้ใช้งานได้ยาวนาน:
+            </p>
+
+            <!-- รูปภาพที่ 2 -->
+            <div class="img-container">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTnrn7VU1t5Xt25ILIRSRn7tVwTDuWLNZItg8SB79S7H3tagHg12BxT62T8&s=10" alt="ความปลอดภัยและการดูแลรักษาอุปกรณ์">
+            </div>
+
+            <div class="highlight-box">
+                1. <strong>ปกป้องข้อมูลส่วนตัว:</strong> ห้ามบอกชื่อจริง นามสกุล ที่อยู่ เบอร์โทร หรือชื่อโรงเรียนแก่คนแปลกหน้าบนโลกออนไลน์เด็ดขาด<br>
+                2. <strong>ระวังลิงก์แปลกปลอม:</strong> อย่าคลิกข้อความชวนเชื่อ เช่น "แจกเพชรฟรี" หรือ "รับรางวัล" เพราะอาจมีไวรัส<br>
+                3. <strong>การดูแลรักษาอุปกรณ์คอมพิวเตอร์:</strong> ปิดเครื่องให้ถูกวิธี, ห้ามนำน้ำหรือขนมมารับประทานใกล้คอมพิวเตอร์, ไม่ขีดเขียนหน้าจอ และทำความสะอาดด้วยผ้าแห้งนุ่มๆ อย่างสม่ำเสมอ
+            </div>
+
+            <!-- กิมมิก: กล่องความลับเรื่องความปลอดภัย -->
+            <div class="secret-box">
+                <div class="secret-title">🛡️ คำถามท้าทาย: ถ้าน้ำหวานหกใส่แป้นพิมพ์คอมพิวเตอร์ ควรทำอย่างไรเป็นอันดับแรก?</div>
+                <button class="secret-btn" onclick="toggleSecret('secret-2', this)">🔍 คลิกเพื่อเปิดดูเฉลย</button>
+                <div id="secret-2" class="secret-content">
+                    <strong>เฉลย:</strong> <strong>"รีบปิดเครื่องและถอดปลั๊กทันที!"</strong> เพื่อป้องกันไม่ให้เกิดไฟฟ้าลัดวงจรและความเสียหายกับอุปกรณ์ จากนั้นรีบแจ้งคุณครูหรือผู้ปกครองให้ช่วยเหลือครับ!
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer>
+        Web-Based Learning System | Computer Education
+    </footer>
+
+    <script>
+        function toggleSecret(id, btn) {
+            const content = document.getElementById(id);
+            if (content.style.display === "block") {
+                content.style.display = "none";
+                btn.innerText = "🔍 คลิกเพื่อเปิดดูเฉลย";
+            } else {
+                content.style.display = "block";
+                btn.innerText = "🔒 ซ่อนเฉลย";
+            }
+        }
+
+        function speakPageContent() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const text = document.getElementById('main-content').innerText;
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'th-TH';
+                utterance.rate = 0.85;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("เบราว์เซอร์ของคุณไม่รองรับระบบเสียงพูด");
+            }
+        }
+
+        function toggleTheme() {
+            document.body.classList.toggle('light-mode');
+            const themeBtn = document.getElementById('theme-btn');
+            if (document.body.classList.contains('light-mode')) {
+                themeBtn.innerText = '☀️';
+                themeBtn.setAttribute('data-tooltip', 'โหมดมืด');
+            } else {
+                themeBtn.innerText = '🌙';
+                themeBtn.setAttribute('data-tooltip', 'สลับโหมดสว่าง/มืด');
+            }
+        }
+
+        const canvas = document.getElementById('fx-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        const particles = [];
+        for (let i = 0; i < 20; i++) {
+            particles.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                length: Math.random() * 15 + 10,
+                radius: Math.random() * 2 + 1.5,
+                speedY: Math.random() * 1 + 0.6,
+                alpha: Math.random() * 0.6 + 0.3
+            });
+        }
+
+        const cursorStars = [];
+        window.addEventListener('mousemove', (e) => {
+            for (let i = 0; i < 2; i++) {
+                cursorStars.push({
+                    x: e.clientX + (Math.random() - 0.5) * 12,
+                    y: e.clientY + (Math.random() - 0.5) * 12,
+                    size: Math.random() * 2.5 + 1,
+                    speedX: (Math.random() - 0.5) * 2,
+                    speedY: (Math.random() - 0.5) * 2,
+                    alpha: 1
+                });
+            }
+        });
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const isLight = document.body.classList.contains('light-mode');
+
+            particles.forEach(p => {
+                ctx.globalAlpha = p.alpha;
+
+                if (isLight) {
+                    ctx.strokeStyle = 'rgba(2, 132, 199, 0.65)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p.x - 2, p.y + p.length);
+                    ctx.stroke();
+
+                    p.y += p.speedY * 10;
+                    p.x -= 0.8;
+                } else {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                    ctx.fill();
+
+                    p.y += p.speedY * 1.2; 
+                    p.x += Math.sin(p.y / 30) * 0.4;
+                }
+
+                if (p.y > canvas.height) {
+                    p.y = -20;
+                    p.x = Math.random() * canvas.width;
+                }
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+            });
+
+            cursorStars.forEach((star, index) => {
+                ctx.globalAlpha = star.alpha;
+                const isLightMode = document.body.classList.contains('light-mode');
+                ctx.fillStyle = isLightMode ? '#0284c7' : '#00f2fe';
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+
+                star.x += star.speedX;
+                star.y += star.speedY;
+                star.alpha -= 0.04;
+
+                if (star.alpha <= 0) {
+                    cursorStars.splice(index, 1);
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
