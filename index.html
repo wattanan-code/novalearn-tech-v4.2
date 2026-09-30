@@ -83,14 +83,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 45px;
-            height: 45px;
+            width: 48px;
+            height: 48px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             color: var(--sub-text);
             text-decoration: none;
-            font-size: 1.2rem;
+            font-size: 1.35rem;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -106,12 +106,12 @@
         .sidebar-item::after {
             content: attr(data-tooltip);
             position: absolute;
-            left: 60px;
+            left: 62px;
             background: var(--bg-color);
             color: var(--accent-color);
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 0.75rem;
+            font-size: 0.9rem;
             white-space: nowrap;
             opacity: 0;
             pointer-events: none;
@@ -151,13 +151,13 @@
         }
         .logo {
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             color: var(--accent-color);
         }
         .nav-links {
             display: flex;
-            gap: 30px;
-            font-size: 0.9rem;
+            gap: 28px;
+            font-size: 1.05rem;
             color: var(--sub-text);
         }
         .nav-links a {
@@ -170,9 +170,9 @@
             text-shadow: 0 0 10px var(--accent-color);
         }
         .user-info {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             background: rgba(0, 242, 254, 0.1);
-            padding: 6px 14px;
+            padding: 6px 16px;
             border-radius: 20px;
             border: 1px solid var(--border-color);
             color: var(--accent-color);
@@ -180,22 +180,22 @@
 
         .hero {
             text-align: center;
-            max-width: 900px;
+            max-width: 1050px; /* ขยายความกว้างกล่องให้พอดีกับการตัดบรรทัดสวยๆ */
             margin: 0 auto;
         }
         .badge {
             display: inline-block;
             background: linear-gradient(135deg, #0072ff, #00f2fe);
             color: #fff;
-            font-size: 0.75rem;
-            padding: 4px 12px;
+            font-size: 0.9rem;
+            padding: 5px 14px;
             border-radius: 20px;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
             font-weight: 600;
             box-shadow: 0 0 15px rgba(0, 242, 254, 0.3);
         }
         h1 {
-            font-size: 2.5rem;
+            font-size: 2.5rem; /* ปรับขนาดให้ใหญ่ชัดเจนและตัดคำได้พอดี 2 บรรทัดสวยงาม */
             font-weight: 600;
             line-height: 1.4;
             margin-bottom: 15px;
@@ -204,26 +204,27 @@
             -webkit-text-fill-color: transparent;
         }
         .subject {
-            font-size: 0.95rem;
+            font-size: 1.15rem;
             color: var(--sub-text);
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
         .desc {
-            font-size: 0.9rem;
+            font-size: 1.15rem;
             color: var(--desc-color);
-            line-height: 1.6;
-            margin-bottom: 30px;
+            line-height: 1.65;
+            margin-bottom: 28px;
+            font-weight: 400;
         }
 
         .btn-group {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 16px;
         }
         .btn {
-            padding: 10px 24px;
+            padding: 12px 28px;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 1.05rem;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -253,7 +254,7 @@
 
         footer {
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.92rem;
             color: var(--sub-text);
             padding-bottom: 10px;
         }
@@ -263,7 +264,7 @@
 
     <canvas id="fx-canvas"></canvas>
 
-    <!-- Sidebar เพิ่มปุ่ม 📚 เชื่อมโยงไปหน้า content.html -->
+    <!-- Sidebar -->
     <div class="sidebar">
         <a href="index.html" class="sidebar-item active" data-tooltip="หน้าแรก">🏠</a>
         <a href="content.html" class="sidebar-item" data-tooltip="รายละเอียดบทเรียน">📚</a>
@@ -274,9 +275,9 @@
         <div class="sidebar-item" id="theme-btn" data-tooltip="สลับโหมดสว่าง/มืด" onclick="toggleTheme()">🌙</div>
     </div>
 
-    <!-- Navbar เพิ่มเมนูรายละเอียดบทเรียน -->
+    <!-- Navbar -->
     <nav class="animate-nav">
-        <div class="logo">NovaLearn <span style="font-size: 0.7rem; color: var(--accent-color);"> ว4.2</span></div>
+        <div class="logo">NovaLearn <span style="font-size: 0.8rem; color: var(--accent-color);"> ว4.2</span></div>
         <div class="nav-links">
             <a href="index.html" class="active" style="color: var(--accent-color);">หน้าแรก</a>
             <a href="content.html">รายละเอียดบทเรียน</a>
@@ -292,7 +293,7 @@
     <div class="hero" id="main-content">
         <div class="animate-hero-1">
             <div class="badge">⚡ บทเรียนออนไลน์ วิชาเทคโนโลยี</div>
-            <h1>แหล่งเรียนรู้ดิจิทัล พัฒนาทักษะการคิดเชิงคำนวณ เทคโนโลยี และการรู้ดิจิทัล สำหรับผู้เรียนยุคใหม่</h1>
+            <h1>แหล่งเรียนรู้ดิจิทัล พัฒนาทักษะการคิดเชิงคำนวณ<br>เทคโนโลยี และการรู้ดิจิทัล สำหรับผู้เรียนยุคใหม่</h1>
         </div>
         
         <div class="animate-hero-2">

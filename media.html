@@ -44,6 +44,7 @@
             position: relative;
             overflow-x: hidden;
             transition: background-color 0.3s, color 0.3s;
+            font-size: 1.05rem; /* ขยายขนาดตัวหนังสือพื้นฐานให้ใหญ่ขึ้นเล็กน้อย */
         }
 
         /* Canvas สำหรับสภาพอากาศและดาวตามเมาส์ */
@@ -84,14 +85,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 45px;
-            height: 45px;
+            width: 48px;
+            height: 48px;
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             color: var(--sub-text);
             text-decoration: none;
-            font-size: 1.2rem;
+            font-size: 1.35rem;
             cursor: pointer;
             transition: all 0.3s ease;
         }
@@ -110,9 +111,9 @@
             left: 60px;
             background: var(--bg-color);
             color: var(--accent-color);
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 6px;
-            font-size: 0.75rem;
+            font-size: 0.85rem;
             white-space: nowrap;
             opacity: 0;
             pointer-events: none;
@@ -132,20 +133,23 @@
             align-items: center;
             background: var(--nav-bg);
             border: 1px solid var(--border-color);
-            padding: 14px 30px;
+            padding: 16px 30px;
             border-radius: 12px;
             backdrop-filter: blur(10px);
             margin-bottom: 30px;
         }
         .logo {
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             color: var(--accent-color);
+        }
+        .logo span {
+            font-size: 0.8rem !important;
         }
         .nav-links {
             display: flex;
             gap: 40px;
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: var(--sub-text);
         }
         .nav-links a {
@@ -158,9 +162,9 @@
             text-shadow: 0 0 10px var(--accent-color);
         }
         .user-info {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             background: rgba(0, 242, 254, 0.1);
-            padding: 6px 14px;
+            padding: 8px 16px;
             border-radius: 20px;
             border: 1px solid var(--border-color);
             color: var(--accent-color);
@@ -175,7 +179,7 @@
             padding-bottom: 20px;
         }
         .section-title {
-            font-size: 1.5rem;
+            font-size: 1.65rem;
             font-weight: 600;
             margin-bottom: 20px;
             color: var(--accent-color);
@@ -185,14 +189,14 @@
         .grid-3 {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
+            gap: 22px;
             margin-bottom: 40px;
         }
         .card {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 20px;
+            padding: 24px;
             transition: 0.3s;
             backdrop-filter: blur(5px);
         }
@@ -202,14 +206,14 @@
             box-shadow: 0 10px 30px rgba(0, 242, 254, 0.1);
         }
         .card h3 {
-            font-size: 1.05rem;
-            margin-bottom: 10px;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
             color: var(--text-color);
         }
         .card p {
-            font-size: 0.85rem;
+            font-size: 0.98rem;
             color: var(--sub-text);
-            line-height: 1.5;
+            line-height: 1.7;
             margin-bottom: 15px;
         }
         
@@ -240,20 +244,20 @@
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 16px;
-            padding: 25px;
+            padding: 28px;
             backdrop-filter: blur(5px);
             box-shadow: 0 10px 30px rgba(0, 242, 254, 0.1);
         }
         .obs-card h3 {
-            font-size: 1.2rem;
+            font-size: 1.35rem;
             margin-bottom: 15px;
             color: var(--text-color);
             text-align: center;
         }
         .obs-card p {
-            font-size: 0.9rem;
+            font-size: 1.02rem;
             color: var(--sub-text);
-            line-height: 1.6;
+            line-height: 1.7;
             text-align: center;
             max-width: 700px;
             margin: 0 auto;
@@ -264,7 +268,7 @@
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             border-radius: 12px;
-            padding: 25px;
+            padding: 28px;
             text-align: center;
             margin-bottom: 30px;
             backdrop-filter: blur(5px);
@@ -273,7 +277,7 @@
             margin-right: auto;
         }
         .minigame-title {
-            font-size: 1.1rem;
+            font-size: 1.25rem;
             color: var(--accent-color);
             margin-bottom: 15px;
             font-weight: 600;
@@ -282,35 +286,35 @@
             background: var(--nav-bg);
             border: 1px solid var(--border-color);
             border-radius: 10px;
-            padding: 20px;
+            padding: 24px;
         }
         .quiz-info {
             display: flex;
             justify-content: space-between;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             color: var(--sub-text);
             margin-bottom: 15px;
         }
         .quiz-question {
-            font-size: 1.05rem;
+            font-size: 1.15rem;
             color: var(--text-color);
             margin-bottom: 20px;
             font-weight: 600;
-            line-height: 1.5;
+            line-height: 1.6;
         }
         .quiz-options {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 14px;
             margin-bottom: 15px;
         }
         .quiz-btn {
             background: var(--card-bg);
             border: 1px solid var(--border-color);
             color: var(--text-color);
-            padding: 12px;
+            padding: 14px;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-size: 1rem;
             cursor: pointer;
             transition: 0.2s;
             font-family: 'Prompt', sans-serif;
@@ -321,16 +325,16 @@
             border-color: var(--accent-color);
         }
         .quiz-status {
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             color: var(--desc-color);
-            margin-top: 10px;
+            margin-top: 12px;
         }
 
         footer {
             text-align: center;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: var(--sub-text);
-            padding-top: 10px;
+            padding-top: 15px;
         }
     </style>
 </head>
@@ -351,7 +355,7 @@
 
     <!-- เมนูด้านบน -->
     <nav>
-        <div class="logo">NovaLearn <span style="font-size: 0.7rem; color: var(--accent-color);">ว4.2</span></div>
+        <div class="logo">NovaLearn <span style="font-size: 0.8rem; color: var(--accent-color);">ว4.2</span></div>
         <div class="nav-links">
             <a href="index.html">หน้าแรก</a>
             <a href="ebook.html">E-Book</a>
@@ -417,12 +421,12 @@
             <div class="card">
                 <h3>AI Image Generation (ภาพประกอบ)</h3>
                 <p>ประยุกต์ใช้เครื่องมือปัญญาประดิษฐ์ (เช่น Bing Image Creator) ในการสร้างสรรค์ภาพประกอบหน้าปกและสื่อกราฟิกสำหรับบทเรียน เพื่อดึงดูดความสนใจของผู้เรียนให้ตื่นตัวอยู่เสมอ</p>
-                <span style="font-size: 0.75rem; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 4px 8px; border-radius: 4px;">เครื่องมือ: Bing Image Creator / Canva AI</span>
+                <span style="font-size: 0.85rem; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 5px;">เครื่องมือ: Bing Image Creator / Canva AI</span>
             </div>
             <div class="card">
                 <h3>AI Voice & Script (เสียงบรรยาย)</h3>
                 <p>ใช้เทคโนโลยี AI Text-to-Speech (Botnoi Voice) ในการสังเคราะห์เสียงพากย์ภาษาไทยสำหรับวิดีโอพอดคาสต์ ช่วยเพิ่มความน่าฟัง ชัดเจน และได้มาตรฐานสม่ำเสมอ</p>
-                <span style="font-size: 0.75rem; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 4px 8px; border-radius: 4px;">เครื่องมือ: Botnoi Voice (บอทน้อย วอยซ์)</span>
+                <span style="font-size: 0.85rem; color: #38bdf8; background: rgba(56, 189, 248, 0.1); padding: 5px 10px; border-radius: 4px; display: inline-block; margin-top: 5px;">เครื่องมือ: Botnoi Voice (บอทน้อย วอยซ์)</span>
             </div>
         </div>
 
